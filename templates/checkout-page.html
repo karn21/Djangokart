@@ -1,0 +1,202 @@
+{% extends 'base.html' %} {% load crispy_forms_tags %} {% load
+cart_template_tags %} {% block title %}Checkout | DJangoKart {% endblock title
+%} {% block content %}
+<!--Main layout-->
+<main>
+  <div class="container wow fadeIn">
+    <h2 class="my-5 h2 text-center">Checkout form</h2>
+    <div class="row">
+      <div class="col-md-8 mb-4">
+        <div class="card">
+          <form class="card-body" method="POST">
+            {% csrf_token %}
+            <div class="address-form">
+              <div class="md-form mb-5">
+                {{ form.street_address }}
+                <label for="id_street_address" class="">Address</label>
+              </div>
+              <div class="md-form mb-5">
+                {{ form.apartment_address }}
+                <label for="id_apartent_address" class=""
+                  >Address 2 (optional)</label
+                >
+              </div>
+              <div class="row">
+                <div class="col-lg-4 col-md-12 mb-4">
+                  <label for="id_country">Country</label>
+                  {{form.country}}
+                  <div class="invalid-feedback">
+                    Please select a valid country.
+                  </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                  <label for="id_zip">Zip</label>
+                  {{ form.zip }}
+                  <div class="invalid-feedback">
+                    Zip code required.
+                  </div>
+                </div>
+              </div>
+              <hr />
+              <div class="custom-control custom-checkbox">
+                {{form.save_address}}
+                <label class="custom-control-label" for="id_save_address"
+                  >Save this information for next time</label
+                >
+              </div>
+            </div>
+
+            {% if shipping_address %}
+            <div class="custom-control custom-checkbox">
+              {{form.use_default}}
+              <label class="custom-control-label" for="id_use_default"
+                >Use default Address : {{
+                shipping_address.street_address|truncatechars:30}}...</label
+              >
+            </div>
+
+            <div
+              class="col-md-6 mb-4 mt-3 default-address"
+              style="display: none;"
+            >
+              <ul class="list-group mb-3 z-depth-1">
+                <li class="m-2 d-flex justify-content-between lh-condensed">
+                  <span class="text-muted"
+                    >{{shipping_address.apartment_address}},
+                    {{shipping_address.street_address}}</span
+                  >
+                </li>
+                <li class="m-2 d-flex justify-content-between lh-condensed">
+                  <span class="text-muted"
+                    >{{shipping_address.zip}},
+                    {{shipping_address.country.name}}</span
+                  >
+                </li>
+              </ul>
+            </div>
+
+            {% endif %}
+
+            <hr />
+
+            <div class="d-block my-3">
+              {% for value,name in form.fields.payment_method.choices %}
+              <div class="custom-control custom-radio">
+                <input
+                  id="{{name}}"
+                  name="payment_method"
+                  value="{{value}}"
+                  type="radio"
+                  class="custom-control-input"
+                  required
+                />
+                <label class="custom-control-label" for="{{name}}">
+                  {{name}}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+            <hr class="mb-4" />
+            <button class="btn btn-primary btn-lg btn-block" type="submit">
+              Continue to checkout
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <!-- Heading -->
+        <h4 class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted">Your cart</span>
+          <span class="badge badge-secondary badge-pill"
+            >{{request.user|cart_items_count}}</span
+          >
+        </h4>
+
+        <!-- Cart -->
+        <ul class="list-group mb-3 z-depth-1">
+          {% for order_item in order.items.all %}
+          <li
+            class="list-group-item d-flex justify-content-between lh-condensed"
+          >
+            <div>
+              <h6 class="my-0">
+                {{order_item.quantity}} x {{order_item.item.title}}
+              </h6>
+              <small class="text-muted"
+                >{{order_item.item.description| truncatechars:50}}</small
+              >
+            </div>
+            <span class="text-muted">${{order_item.get_final_price}}</span>
+          </li>
+          {% endfor %} {% if order.coupon %}
+          <li class="list-group-item d-flex justify-content-between bg-light">
+            <div class="text-success">
+              <h6 class="my-0">Promo code</h6>
+              <small>{{order.coupon}}</small>
+            </div>
+            <div class="text-success">
+              <h6 class="my-0">-${{order.get_coupon_discount}}</h6>
+              <a href="{% url 'core:coupon_remove' %}"
+                ><small class="text-danger">Remove</small></a
+              >
+            </div>
+          </li>
+          {% endif %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Total (USD)</span>
+            <strong>${{order.get_final_total}}</strong>
+          </li>
+        </ul>
+        <!-- Cart -->
+        {% if not order.coupon %}
+        <!-- Promo code -->
+        <form
+          class="card p-2"
+          method="POST"
+          action="{% url 'core:coupon_apply' %}"
+        >
+          {% csrf_token %}
+          <div class="input-group">
+            {{coupon_form.code}}
+            <div class="input-group-append">
+              <button
+                class="btn btn-secondary btn-md waves-effect m-0"
+                type="submit"
+              >
+                Redeem
+              </button>
+            </div>
+          </div>
+        </form>
+        <!-- Promo code -->
+        {% endif %}
+      </div>
+      <!--Grid column-->
+    </div>
+    <!--Grid row-->
+  </div>
+</main>
+<!--Main layout-->
+
+{% endblock content %} {% block scripts %}
+<script>
+  $(document).ready(function() {
+    var form = $(".address-form");
+    var address = $(".default-address");
+    var useDefault = $("#id_use_default");
+    console.log(form);
+    console.log(useDefault);
+    useDefault.change(function() {
+      if (this.checked) {
+        form.hide();
+        address.show();
+      } else {
+        form.show();
+        address.hide();
+      }
+    });
+  });
+</script>
+
+{% endblock scripts %}
