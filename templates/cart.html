@@ -1,5 +1,8 @@
-{% extends 'base.html' %} {% block head_title %}Home | DjangoKart{% endblock
-head_title %} {% block content %}
+{% extends 'base.html' %} 
+{% block head_title %}
+Home | DjangoKart
+{% endblock head_title %} 
+{% block content %}
 
 <main>
   <div class="container">
@@ -41,8 +44,8 @@ head_title %} {% block content %}
               ></a>
             </td>
             <td>
-              ${{order_item.get_final_price}} {% if
-              order_item.item.discount_price %}
+              ${{order_item.get_final_price}} 
+              {% if order_item.item.discount_price %}
               <span class="badge badge-success ml-2"
                 >Savings: ${{order_item.get_savings}}</span
               >

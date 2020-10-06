@@ -206,9 +206,11 @@ class OrderSummaryView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
+            print(order)
             context = {
                 'order': order
             }
+            print(order)
             return render(self.request, 'cart.html', context)
         except:
             messages.info(self.request, "Your cart is empty!")

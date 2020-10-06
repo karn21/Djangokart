@@ -1,0 +1,19 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+django = "==2.2"
+django-allauth = "*"
+python-decouple = "*"
+django-countries = "*"
+django-crispy-forms = "*"
+django-debug-toolbar = "*"
+stripe = "*"
+pillow = "*"
+
+[requires]
+python_version = "3.6"
